@@ -4,7 +4,8 @@
   "description": "",
   "main": "busylight-cli.js",
   "dependencies": {
-    "busylight": "^0.3.1"
+    "busylight": "^0.3.1",
+    "ps-node": "^0.1.6"
   },
   "devDependencies": {},
   "scripts": {

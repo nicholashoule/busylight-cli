@@ -2,9 +2,8 @@
 BusyLight wrapper for Linux users.
 
 ```
-# ^0.3.1
-
 npm install busylight
+npm install ps-node
 ```
 
 
