@@ -1,0 +1,15 @@
+{
+  "name": "busylight-cli",
+  "version": "0.0.2",
+  "description": "",
+  "main": "busylight-cli.js",
+  "dependencies": {
+    "busylight": "^0.3.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Nicholas Houle",
+  "license": "ISC"
+}
