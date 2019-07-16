@@ -65,6 +65,13 @@ var myMain = function (){
 
   // Get the busylight device and with the path
   var bl = busylight.get();
+  var now = new Date();
+
+  // Let the user know the program has started
+  // Vendor: 27bb
+  // Product: 3bcd
+  // ModelName: BusyLight UC Alpha
+  console.log("Kuando Busylight\n");
   // Defaults
   bl.defaults({
     keepalive: true,      // If the busylight is not kept alive it will turn off after 30 seconds
@@ -78,7 +85,8 @@ var myMain = function (){
 
   // Keep alive isn't working so here we are
   function intervalFunc() {
-    console.log('Status: running.');
+    now = new Date();
+    console.log('Time: %s', now.toUTCString());
   }
 
   // Check for 'off'
@@ -96,14 +104,16 @@ var myMain = function (){
     bl.off();
     bl.blink(['white', '#ff4500'], 800);
     console.log("Status: work.");
+    console.log('Time: %s', now.toUTCString());
   }
 
   // Check for 'red' = busy
   // Keepalive isn't working so we need setInterval
   if (args && String(args) === 'busy') {
       bl.light("red")
-      //console.log("Status: busy.")
-      setInterval(intervalFunc, 60000);
+      console.log("Status: busy.");
+      console.log('Time: %s', now.toUTCString());
+      setInterval(intervalFunc, 60000); // keepalive hack
 
   }
 
@@ -112,6 +122,7 @@ var myMain = function (){
     bl.off();
     bl.pulse("yellow");
     console.log("Status: away.")
+    console.log('Time: %s', now.toUTCString());
   }
 
   // Check for 'police' = Bad Boys! Bad Boys! Whatcha gonna do--
@@ -119,6 +130,7 @@ var myMain = function (){
     bl.off();
     bl.ring('Buzz').blink(['red', 'white', 'blue', 'white'], 200);
     console.log("Status: police.")
+    console.log('Time: %s', now.toUTCString());
   }
 
   if(args && String(args) === '') {
@@ -132,4 +144,3 @@ var myMain = function (){
 
 };
 myMain();
-

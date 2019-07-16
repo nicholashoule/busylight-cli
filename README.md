@@ -1,6 +1,8 @@
 # busylight-cli
 Kuando Busylight nodejs wrapper for Linux users.
 
+ModelName: BusyLight UC Alpha
+
 #### npm & nodjs:
 
 https://nodejs.org/en/download/
