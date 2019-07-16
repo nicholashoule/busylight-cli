@@ -93,14 +93,17 @@ var myMain = function (){
   if(args && String(args) === 'off' || String(args) === 'stop') {
     setTimeout(function(){
         // Exit BusyLight (Delayed)
+        now = new Date();
         bl.off();
         console.log("Shutting down BusyLight.");
+        console.log('Time: %s', now.toUTCString());
         process.exit(myMain);
     }, 5);
   }
 
   // Check for 'work' = busy, but interuptable
   if (args && String(args) === 'work') {
+    now = new Date();
     bl.off();
     bl.blink(['white', '#ff4500'], 800);
     console.log("Status: work.");
@@ -110,15 +113,16 @@ var myMain = function (){
   // Check for 'red' = busy
   // Keepalive isn't working so we need setInterval
   if (args && String(args) === 'busy') {
+      now = new Date();
       bl.light("red")
       console.log("Status: busy.");
       console.log('Time: %s', now.toUTCString());
-      setInterval(intervalFunc, 60000); // keepalive hack
-
+      setInterval(intervalFunc, 600000); // 10min, keepalive hack
   }
 
   // Check for 'yellow' = away
   if (args && String(args) === 'away') {
+    now = new Date();
     bl.off();
     bl.pulse("yellow");
     console.log("Status: away.")
@@ -127,6 +131,7 @@ var myMain = function (){
 
   // Check for 'police' = Bad Boys! Bad Boys! Whatcha gonna do--
   if (args && String(args) === 'police') {
+    now = new Date();
     bl.off();
     bl.ring('Buzz').blink(['red', 'white', 'blue', 'white'], 200);
     console.log("Status: police.")
