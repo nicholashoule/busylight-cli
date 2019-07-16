@@ -11,11 +11,9 @@
 var args = process.argv.slice(2)
 //Debug: console.log(args);
 
-// Required for process lookup
+// Required for process lookup, and busylight
 var ps = require('ps-node');
-
-// Get the busylight device and with the path
-var busylight = require('busylight').get();
+var busylight = require('busylight');
 
 // A simple pid lookup
 ps.lookup({
@@ -51,23 +49,9 @@ ps.lookup({
 
           });
         }
-
     });
-
     //Debug: Print the process count
     //console.log('Count: %s', count );
-
-});
-
-// Defaults
-busylight.defaults({
-  keepalive: true,      // If the busylight is not kept alive it will turn off after 30 seconds
-  color: 'white',       // The default color to use for light, blink and pulse
-  duration: 30 * 1000,  // The duration for a blink or pulse sequence
-  rate: 300,            // The rate at which to blink or pulse
-  degamma: true,        // Fix rgb colors to present a better light
-  tone: 'OpenOffice',   // Default ring tone
-  volume: 7             // Default volume
 });
 
 // Function myMain()
@@ -79,39 +63,62 @@ busylight.defaults({
 //
 var myMain = function (){
 
+  // Get the busylight device and with the path
+  var bl = busylight.get();
+  // Defaults
+  bl.defaults({
+    keepalive: true,      // If the busylight is not kept alive it will turn off after 30 seconds
+    color: 'white',       // The default color to use for light, blink and pulse
+    duration: 30 * 1000,  // The duration for a blink or pulse sequence
+    rate: 300,            // The rate at which to blink or pulse
+    degamma: true,        // Fix rgb colors to present a better light
+    tone: 'OpenOffice',   // Default ring tone
+    volume: 4             // Default volume
+  });
+
+  // Keep alive isn't working so here we are
+  function intervalFunc() {
+    console.log('Status: running.');
+  }
+
   // Check for 'off'
-  if(args && String(args) === 'off') {
+  if(args && String(args) === 'off' || String(args) === 'stop') {
     setTimeout(function(){
         // Exit BusyLight (Delayed)
-        busylight.off();
+        bl.off();
         console.log("Shutting down BusyLight.");
-
         process.exit(myMain);
     }, 5);
   }
 
   // Check for 'work' = busy, but interuptable
   if (args && String(args) === 'work') {
-    busylight.off();
-    busylight.blink(['white', '#ff4500'], 800);
+    bl.off();
+    bl.blink(['white', '#ff4500'], 800);
+    console.log("Status: work.");
   }
 
   // Check for 'red' = busy
+  // Keepalive isn't working so we need setInterval
   if (args && String(args) === 'busy') {
-    busylight.off();
-    busylight.pulse(["red"]);
+      bl.light("red")
+      //console.log("Status: busy.")
+      setInterval(intervalFunc, 10500);
+
   }
 
   // Check for 'yellow' = away
   if (args && String(args) === 'away') {
-    busylight.off();
-    busylight.pulse("yellow");
+    bl.off();
+    bl.pulse("yellow");
+    console.log("Status: away.")
   }
 
   // Check for 'police' = Bad Boys! Bad Boys! Whatcha gonna do--
   if (args && String(args) === 'police') {
-    busylight.off();
-    busylight.ring('Buzz').blink(['red', 'white', 'blue', 'white'], 200);
+    bl.off();
+    bl.ring('Buzz').blink(['red', 'white', 'blue', 'white'], 200);
+    console.log("Status: police.")
   }
 
   if(args && String(args) === '') {
@@ -119,7 +126,7 @@ var myMain = function (){
       color = 'white';
 
       if(color)
-        busylight.pulse(["'"+color+"'"]);
+        bl.pulse(["'"+color+"'"]);
     }, 2000);
   }
 
