@@ -103,7 +103,7 @@ var myMain = function (){
   if (args && String(args) === 'busy') {
       bl.light("red")
       //console.log("Status: busy.")
-      setInterval(intervalFunc, 10500);
+      setInterval(intervalFunc, 60000);
 
   }
 

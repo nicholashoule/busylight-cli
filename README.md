@@ -20,7 +20,11 @@ sudo node busylight-cli.js work
 ```
 
 ```
-sudo node busylight-cli off
+sudo node busylight-cli.js busy
+```
+
+```
+sudo node busylight-cli stop
 ```
 
 
