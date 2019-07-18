@@ -4,19 +4,30 @@
 //
 // Requires:
 //    npm install busylight
+//    npm install ps-node
+//
+// Function getDate() ... update the date
+function getDate() {
+  now = new Date();
+  //console.log('Time: %s', now.toUTCString());
+  return now
+}
 
-// Get args passed to script
-// args[2] will be are starting point since
-// args[0] and args[1] are reserved
-var args = process.argv.slice(2)
-//Debug: console.log(args);
+// Function intervalFunc() ... keepalive hack 
+// bl.light("red") doesn't stay on 
+// Keep alive isn't working so here we are
+function intervalFunc() {
+  now = getDate();
+  console.log('Time: %s', now.toUTCString());
+}
 
-// Required for process lookup, and busylight
-var ps = require('ps-node');
-var busylight = require('busylight');
-
-// A simple pid lookup
-ps.lookup({
+// Function pidTracker() ... ensure one process is running
+function pidTracker() {
+  // pid lookup vars
+  var count = 0;
+  var pidTracker = [];
+  // A simple pid lookup
+  ps.lookup({
     command: 'node',
     psargs: 'aux'
     }, function(err, resultList ) {
@@ -24,10 +35,7 @@ ps.lookup({
       throw new Error( err );
     }
 
-    var count = 0;
-    var pidTracker = [];
     console.log();
-
     //Loop through the object
     resultList.forEach(function( process ){
 
@@ -45,33 +53,90 @@ ps.lookup({
               throw new Error( err );
             } else {
               //Debug: console.log('Process %s has been killed.', String(pidTracker[0]) );
+              bl.off();
+              console.log("Found BusyLight process to stop.");
+              Main();
             }
-
           });
         }
     });
-    //Debug: Print the process count
     //console.log('Count: %s', count );
-});
+  });
+}
 
-// Function myMain()
+// Function getState() ... change BusyLight state
+function getState(args) {
+  // Check for 'off'
+  if(args && String(args) === 'off' || String(args) === 'stop') {
+    setTimeout(function(){
+        // Exit BusyLight (Delayed)
+        now = getDate();
+        //bl.off();
+        console.log('Time: %s', now.toUTCString());
+        console.log("Shutting down BusyLight.");
+        process.exit(Main);
+    }, 5);
+  }
+
+  // Check for 'work' = busy, but interuptable
+  if (args && String(args) === 'work') {
+    now = getDate();
+    //bl.off()
+    bl.blink(['white', '#ff4500'], 800);
+    console.log("Status: work.");
+    console.log('Time: %s', now.toUTCString());
+  } else if (args && String(args) === 'busy') {
+    // Check for 'red' = busy
+    // Keepalive isn't working so we need setInterval
+    now = getDate();
+    bl.light("red")
+    console.log("Status: busy.");
+    console.log('Time: %s', now.toUTCString());
+    setInterval(intervalFunc, 600000); // 10min, keepalive hack
+  } else if (args && String(args) === 'away') {
+    // Check for 'yellow' = away
+    now = getDate();
+    //bl.off();
+    bl.pulse("yellow");
+    console.log("Status: away.")
+    console.log('Time: %s', now.toUTCString());
+  } else if (args && String(args) === 'police') {
+    // Check for 'police' = Bad Boys! Bad Boys! Whatcha gonna do--
+    now = getDate();
+    //bl.off();
+    bl.ring('Buzz').blink(['red', 'white', 'blue', 'white'], 200);
+    console.log("Status: police.")
+    console.log('Time: %s', now.toUTCString());
+  } else if (args && String(args) === '' || String(args) === 'free') {
+      color = 'blue';
+
+      if(color) {
+        bl.light(color);
+      } else { bl.light('white'); }
+
+      console.log("Status: free.")
+      setInterval(intervalFunc, 600000); // 10min, keepalive hack
+  }
+}
+
+// Function Main()
 // Description:
 //    Main function for the script
 //
 //    Params:
 //      off, work, busy, away, police
 //
-var myMain = function (){
+var Main = async() => {
 
-  // Get the busylight device and with the path
-  var bl = busylight.get();
-  var now = new Date();
+  // Check for existing BusyLight process
+  await pidTracker()
 
-  // Let the user know the program has started
-  // Vendor: 27bb
-  // Product: 3bcd
-  // ModelName: BusyLight UC Alpha
-  console.log("Kuando Busylight\n");
+  // Get args passed to script
+  // args[2] will be are starting point since
+  // args[0] and args[1] are reserved
+  var args = process.argv.slice(2)
+  var now = getDate();
+
   // Defaults
   bl.defaults({
     keepalive: true,      // If the busylight is not kept alive it will turn off after 30 seconds
@@ -83,69 +148,15 @@ var myMain = function (){
     volume: 4             // Default volume
   });
 
-  // Keep alive isn't working so here we are
-  function intervalFunc() {
-    now = new Date();
-    console.log('Time: %s', now.toUTCString());
-  }
-
-  // Check for 'off'
-  if(args && String(args) === 'off' || String(args) === 'stop') {
-    setTimeout(function(){
-        // Exit BusyLight (Delayed)
-        now = new Date();
-        bl.off();
-        console.log("Shutting down BusyLight.");
-        console.log('Time: %s', now.toUTCString());
-        process.exit(myMain);
-    }, 5);
-  }
-
-  // Check for 'work' = busy, but interuptable
-  if (args && String(args) === 'work') {
-    now = new Date();
-    bl.off();
-    bl.blink(['white', '#ff4500'], 800);
-    console.log("Status: work.");
-    console.log('Time: %s', now.toUTCString());
-  }
-
-  // Check for 'red' = busy
-  // Keepalive isn't working so we need setInterval
-  if (args && String(args) === 'busy') {
-      now = new Date();
-      bl.light("red")
-      console.log("Status: busy.");
-      console.log('Time: %s', now.toUTCString());
-      setInterval(intervalFunc, 600000); // 10min, keepalive hack
-  }
-
-  // Check for 'yellow' = away
-  if (args && String(args) === 'away') {
-    now = new Date();
-    bl.off();
-    bl.pulse("yellow");
-    console.log("Status: away.")
-    console.log('Time: %s', now.toUTCString());
-  }
-
-  // Check for 'police' = Bad Boys! Bad Boys! Whatcha gonna do--
-  if (args && String(args) === 'police') {
-    now = new Date();
-    bl.off();
-    bl.ring('Buzz').blink(['red', 'white', 'blue', 'white'], 200);
-    console.log("Status: police.")
-    console.log('Time: %s', now.toUTCString());
-  }
-
-  if(args && String(args) === '') {
-    setTimeout(function(color){
-      color = 'white';
-
-      if(color)
-        bl.pulse(["'"+color+"'"]);
-    }, 2000);
-  }
+  getState(args);
 
 };
-myMain();
+// Required for process lookup, and busylight
+var ps = require('ps-node');
+var bl = require('busylight').get();
+// Let the user know the program has started
+// Vendor: 27bb
+// Product: 3bcd
+// ModelName: BusyLight UC Alpha
+console.log("Kuando Busylight\n");
+Main();
